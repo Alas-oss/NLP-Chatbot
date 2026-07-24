@@ -44,7 +44,6 @@ The balanced candidate set is scored for query specific relevance via a language
 The final ranked context is inserted into a prompt that explicitly instructs the generation model to answer only from the supplied context, and to state clearly when the context does not contain sufficient information, rather than supplementing from its own general knowledge.
 =======
 The final ranked context is injected into a prompt that explicitly instructs the generation model to answer only from the supplied context, and to state clearly when the context does not contain sufficient information, rather than supplementing from its own general knowledge.
->>>>>>> 07eb1bc99b1407d30b5de37ae471fb0c4d0ce3a7
 
 ### 2.7 Observability
 Every generation call is traced through an external distributed tracing platform via a callback-based integration, recording retrieval statistics and query characteristics while deliberately excluding raw query and response text from transmitted metadata, to limit exposure of source-specific content through the tracing layer.
