@@ -1,5 +1,3 @@
-# import sys
-# sys.path.insert(0, 'src')
 from collections import defaultdict
 from langchain_community.retrievers import BM25Retriever
 from langchain_classic.retrievers.ensemble import EnsembleRetriever

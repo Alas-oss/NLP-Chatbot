@@ -148,7 +148,7 @@ doc.add_paragraph(
     "home matches at New Malden Sports Ground. A separate, even older rugby " \
     "club associated with King's medical school, GKT Men's Rugby (dating to " \
     "1843), is also linked to the founding of the Rugby Football Union itself. " \
-    "King's also has an active rowing club, King's College London Goat Club, " \
+    "King's also has an active rowing club, King's College London Boat Club, " \
     "based on the Thames near Chiswick, with a history stretching back to the " \
     "1930s and past wins at the Henley Royal Regatta."
 )

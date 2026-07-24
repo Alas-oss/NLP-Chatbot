@@ -6,7 +6,7 @@ This report documents the design, implementation, and verification of a retrieva
 
 ## 1. Objectives
 
-The system was designed to answer open-ended natural language questions by retrieving relevant information from a defined knowledge base, rather than relying solely on a language model's general training knowledge. The specific technical objectives included:
+The system was designed to answer open-ended natural language questions by retrieving relevant information from a defined knowledge base, rather than relying solely on the language model's general training knowledge. The specific technical objectives included:
 
 - Support ingestion of multiple document formats (Word documents and PDFs, including scanned/image-based pages) into a unified knowledge base.
 - Combine multiple retrieval strategies (semantic and lexical, specifically keyword) to improve recall and precision over either method alone.
@@ -18,10 +18,17 @@ The system was designed to answer open-ended natural language questions by retri
 ## 2. System Architecture
 
 ### 2.1 Ingestion Pipeline
+<<<<<<< HEAD
 source documents are loaded via format-specific loaders (Word document paragraph extraction; PDF page-level text extraction with automatic optical character recognition fallback for image-only pages), tagged with source-type metadata, and split into retrieval-sized chunks using a recursive boundary-aware text splitter that prefrerentially splits on paragraph and sentence boundaries.
 
 ### 2.2 Embedding and Storage
 Each chunk is converted to a vector embedding via an external embedding API and stored in an in-memory vector index. Embedding is performed in rate-limited batches with automatic exponential backoff, required to operate reliability against the embedding provider's request-volume constraints once a large (several-hudred-page) source was introduced. The resulting chunk set is persisted independently of the vector index, avoiding redundant recomputation on subsequent runs.
+=======
+source documents are loaded via format-specific loaders (Word document paragraph extraction; PDF page-level text extraction with automatic optical character recognition fallback for image-only pages), tagged with source-type metadata, and split into retrieval-sized chunks using a recursive boundary-aware text splitter that preferentially splits on paragraph and sentence boundaries.
+
+### 2.2 Embedding and Storage
+Each chunk is converted to a vector embedding via an external embedding API and stored in an in-memory vector index. Embedding is performed in rate-limited batches with automatic exponential backoff, required to operate reliably against the embedding provider's request-volume constraints once a large (several-hudred-page) source was introduced. The resulting chunk set is persisted independently of the vector index, avoiding redundant recomputation on subsequent runs.
+>>>>>>> 07eb1bc99b1407d30b5de37ae471fb0c4d0ce3a7
 
 ### 2.3 Hybrid Retrieval
 Queries are matched against the knowledge base via two independent methods executed in parallel: dense semantic similarity search over the vector index, and sparse lexical/keyword search (BM25) over the same chunk set. Results are combined via reciprocal rank fusion. This dual-method design mitigates the respective weaknesses of each approach in isolation - semantic search generalizes across paraphrasing but can under-weight exact terminology; lexical search reliably surfaces exact terms but does not generalize across phrasing.
@@ -33,7 +40,11 @@ Prior to final ranking, retrieved candidates are grouped by source and capped at
 The balanced candidate set is scored for query specific relevance via a language-model based reranking step, which evaluates each candidate against the specific query rather than relying on static, query-independent weights. This relevance score is blended with a per-source trust score, allowing manually assessed source reliability to influence final ranking without overriding genuine relevance.
 
 ### 2.6 Grounded Generation
+<<<<<<< HEAD
 The final ranked context is inserted into a prompt that explicitly instructs the generation model to answer only from the supplied context, and to state clearly when the context does not contain sufficient information, rather than supplementing from its own general knowledge.
+=======
+The final ranked context is injected into a prompt that explicitly instructs the generation model to answer only from the supplied context, and to state clearly when the context does not contain sufficient information, rather than supplementing from its own general knowledge.
+>>>>>>> 07eb1bc99b1407d30b5de37ae471fb0c4d0ce3a7
 
 ### 2.7 Observability
 Every generation call is traced through an external distributed tracing platform via a callback-based integration, recording retrieval statistics and query characteristics while deliberately excluding raw query and response text from transmitted metadata, to limit exposure of source-specific content through the tracing layer.
@@ -44,9 +55,9 @@ The system was built incrementally, with each stage validated before the next wa
 
 1. **Baseline intent classification.** An initial implementation used TF-IDF vectorization with a supervised classifier over a small, hand-labeled set of intent categories, falling back to an ungrounded language model call for unmatched input. This implementation is retrained in the repository for reference and comparison.
 2. **Pivot to single-source RAG.** The classifier was replaced with a retrieval-augmented pipeline operating over a single source document, establishing the core chunking, embedding, retrieval, and grounded generation flow.
-3. **Reliability hardening.** Several platform-specific native-dependency failures were identified and resolved during this phase, including two independent instances of an eagerly-imported deep learning framework crashing at import time on the development platform, and one genuine access-vioaltion fault isolated to a vector database's compiled dependencies. In each case, the dependency in question waas replaced with an alternative implementation (an API-based service, or a pure-Python equivalent) rather than continuing to work around the same underlying platform issue through successive patches.
-4. **Multi-format, multi-source expansion.** PDF ingestion with OCR fallback was added, and the ingestion pipeline was generalized to load any supported file type present in the knowedlge base directory without per-format changes elsewhere in the system.
-5. **Ranking sophistication.** Static ensemble retrieval weighting was replaced with query-specific relevance scoring, and source trust weighting was introduced as a secondary ranking signal.
+3. **Reliability hardening.** Several platform-specific native-dependency failures were identified and resolved during this phase, including two independent instances of an imported deep learning framework crashing at import time on the development platform, and one genuine access-vioaltion fault isolated to a vector database's compiled dependencies. In each case, the dependency in question was replaced with an alternative implementation (an API-based service, or a pure-Python equivalent) rather than continuing to work around the same underlying platform issue through successive patches.
+4. **Multi-format, multi-source expansion.** PDF ingestion with OCR fallback was added, and the ingestion pipeline was generalized to load any supported file type present in the knowledge base directory without per-format changes elsewhere in the system.
+5. **Ranking sophistication.** Static ensemble retrieval weighting was replaced with query-specific relevance scoring, and source trust weighing was introduced as a secondary ranking signal.
 6. **Bias identification and correction.** Introducing a large, multi-hundred-page source alongside a much smaller source surface a retrieval bias toward the larger source, caught via direct diagnostic testing rather than assumed absent by default. This was corrected through per-source candidate balancing prior to reranking.
 7. **Verification.** End-to-end testing across both knowledge sources confirmed correct, source-appropriate responses with no observed cross-contamination.
 
@@ -69,4 +80,8 @@ The following verification steps were performed and passed:
 
 ## 6. Conclusion
 
+<<<<<<< HEAD
 The system has progressed from an initial classification-based prototype to a verified, multi-source, multi-strategy retrieval-augmented generation pipeline with relevance-based reranking, source trust weighting, and distributed tracing. End-to-end testing confirms the system correctly retrieves and grounds responses in source-appropriate content across multiple, substantially different knowledge sources, with prior identified defects (metadata tagging, rate-limit handling, and retrieval bias) each resolved and independently verified. 
+=======
+The system has progressed from an initial classification-based prototype to a verified, multi-source, multi-strategy retrieval-augmented generation pipeline with relevance-based reranking, source trust weighting, and distributed tracing. End-to-end testing confirms the system correctly retrieves and grounds responses in source-appropriate content across multiple, substantially different knowledge sources, with prior identified defects (metadata tagging, rate-limit handling, and retrieval bias) each resolved and independently verified. 
+>>>>>>> 07eb1bc99b1407d30b5de37ae471fb0c4d0ce3a7
