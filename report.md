@@ -18,17 +18,10 @@ The system was designed to answer open-ended natural language questions by retri
 ## 2. System Architecture
 
 ### 2.1 Ingestion Pipeline
-<<<<<<< HEAD
-source documents are loaded via format-specific loaders (Word document paragraph extraction; PDF page-level text extraction with automatic optical character recognition fallback for image-only pages), tagged with source-type metadata, and split into retrieval-sized chunks using a recursive boundary-aware text splitter that prefrerentially splits on paragraph and sentence boundaries.
-
-### 2.2 Embedding and Storage
-Each chunk is converted to a vector embedding via an external embedding API and stored in an in-memory vector index. Embedding is performed in rate-limited batches with automatic exponential backoff, required to operate reliability against the embedding provider's request-volume constraints once a large (several-hudred-page) source was introduced. The resulting chunk set is persisted independently of the vector index, avoiding redundant recomputation on subsequent runs.
-=======
 source documents are loaded via format-specific loaders (Word document paragraph extraction; PDF page-level text extraction with automatic optical character recognition fallback for image-only pages), tagged with source-type metadata, and split into retrieval-sized chunks using a recursive boundary-aware text splitter that preferentially splits on paragraph and sentence boundaries.
 
 ### 2.2 Embedding and Storage
 Each chunk is converted to a vector embedding via an external embedding API and stored in an in-memory vector index. Embedding is performed in rate-limited batches with automatic exponential backoff, required to operate reliably against the embedding provider's request-volume constraints once a large (several-hudred-page) source was introduced. The resulting chunk set is persisted independently of the vector index, avoiding redundant recomputation on subsequent runs.
->>>>>>> 07eb1bc99b1407d30b5de37ae471fb0c4d0ce3a7
 
 ### 2.3 Hybrid Retrieval
 Queries are matched against the knowledge base via two independent methods executed in parallel: dense semantic similarity search over the vector index, and sparse lexical/keyword search (BM25) over the same chunk set. Results are combined via reciprocal rank fusion. This dual-method design mitigates the respective weaknesses of each approach in isolation - semantic search generalizes across paraphrasing but can under-weight exact terminology; lexical search reliably surfaces exact terms but does not generalize across phrasing.
