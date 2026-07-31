@@ -13,8 +13,8 @@ def load_pdf_as_documents(path: str, ocr_if_needed: bool = True) -> list[Documen
 
     for i, page in enumerate(reader.pages):
         text = page.extract_text() or ""
-        if len(text.strip()) >= MIN_TEXT_LENGTH:
-            docs.append(Document(page_content=text, metadata={"source": path, "page": i + 1, "ocr": False}))
+        if len(text.strip()) > MIN_TEXT_LENGTH:
+            docs.append(Document(page_content=text, metadata={"source": path, "page": i, "ocr": False}))
         else:
             ocr_pages.append(i)
 
