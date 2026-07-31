@@ -13,7 +13,7 @@ def describe_figures(pdf_path: str, pages: list[int]) -> list[dict]:
         img = images[page_num]
         buf = BytesIO()
         img.save(buf, format="PNG")
-        b64 = base64. b64encode(buf.getvalue().decode())
+        b64 = base64.b64encode(buf.getvalue()).decode()
         response = vision_model.invoke([
             HumanMessage(content=[
                 {"type": "text", "text": "Describe any charts, graphs, or figures on this page factually, including approximate values shown."},
