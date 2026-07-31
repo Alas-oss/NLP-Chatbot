@@ -24,5 +24,5 @@ def rerank(query: str, docs: list, top_n: int = 4) -> list:
         except ValueError:
             score = 0.0
         scored.append((doc, score))
-    ranked = sorted(scored, key=lambda x: x[1], reverse=True)
+    ranked = sorted(scored, key=lambda x: x[1], reverse=False)
     return [doc for doc, score in ranked[:top_n]]
