@@ -11,7 +11,7 @@ def _cap_per_source(docs: list, max_per_source: int = 10) -> list:
 
     capped = []
     for source, source_docs in by_source.items():
-        capped.extend(source_docs[:max_per_source])
+        capped.extend(source_docs[:max_per_source - 1])
     return capped
 
 def build_hybrid_retriever():
