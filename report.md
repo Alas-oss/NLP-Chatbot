@@ -69,5 +69,4 @@ The following verification steps were performed and passed:
 
 ## 6. Conclusion
 
-<<<<<<< HEAD
 The system has progressed from an initial classification-based prototype to a verified, multi-source, multi-strategy retrieval-augmented generation pipeline with relevance-based reranking, source trust weighting, and distributed tracing. End-to-end testing confirms the system correctly retrieves and grounds responses in source-appropriate content across multiple, substantially different knowledge sources, with prior identified defects (metadata tagging, rate-limit handling, and retrieval bias) each resolved and independently verified. 
