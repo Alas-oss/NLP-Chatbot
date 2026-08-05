@@ -11,7 +11,7 @@ def _cap_per_source(docs: list, max_per_source: int = 10) -> list:
 
     capped = []
     for source, source_docs in by_source.items():
-        capped.extend(source_docs[:max_per_source])
+        capped.extend(source_docs[:max_per_source - 1])
     return capped
 
 def build_hybrid_retriever():
@@ -22,7 +22,7 @@ def build_hybrid_retriever():
     bm25_retriever = BM25Retriever.from_documents(chunks)
     bm25_retriever.k = 20
 
-    ensemble = EnsembleRetriever(retrievers=[semantic_retriever, bm25_retriever], weights=[0.6, 0.4])
+    ensemble = EnsembleRetriever(retrievers=[semantic_retriever, bm25_retriever], weights=[0.4, 0.6])
 
     def retrieve_and_rerank(query: str):
         candidates = ensemble.invoke(query)

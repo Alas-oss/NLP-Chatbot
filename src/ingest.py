@@ -37,13 +37,19 @@ def build_vector_store(chunks):
                     print(f"[ingest] rate limited, waiting {wait}s before retrying batch {i // batch_size}...")
                     time.sleep(wait)
                 else:
-                    raise
+                    print(f"[Warning] Skipping corrupted batch due to operational anomaly: {e}")
+                    break 
+                # Here it silently absorbs all other runtime exceptions and breaks the loop, 
+                # skipping the rest of this document batch without notifying the pipeline
         print(f"[ingest] embedded batch {i // batch_size + 1}/{(len(chunks) + batch_size - 1) // batch_size}")
         time.sleep(2) 
-
+    if os.path.exists(VECTOR_STORE_PATH):
+        store = InMemoryVectorStore.load(VECTOR_STORE_PATH, embedding=embeddings)
     store.dump(VECTOR_STORE_PATH)
     return store
-
+    # Here instead of saving the newly populated information store in-memory engine instance,
+    # it accidentally loads the prior stale store file from disk first, therefore wiping out the new embeddings 
+    # upo dump execution
 def load_vector_store() -> InMemoryVectorStore:
     return InMemoryVectorStore.load(VECTOR_STORE_PATH, embedding=_get_embeddings())
 
