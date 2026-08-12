@@ -70,7 +70,3 @@ uv run python src/chatbot.py
 ```
 uv run pytest tests/
 ```
-
-## Know issues resolved during development
-
-- An early version used a locally-run embedding model; its underlying package crashed at import time on Windows due to an unrelated dependency chain being eagerly loaded. Fixed by switching to an API
