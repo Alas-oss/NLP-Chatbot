@@ -1,12 +1,40 @@
-from rag_chain import build_rag_chain
-from entity_extractor import extract_entities
+import os
+from functools import lru_cache
 
-_rag_answer = build_rag_chain() 
+from rag_chain import Answer, build_rag_chain
 
 
-def get_response(user_input: str) -> str:
-    entities = extract_entities(user_input)
-    result = _rag_answer(user_input)
-    print(f"[entities={entities}]")
-    print(f"[retrieved {len(result['sources'])} source chunks]")
-    return result["answer"]
+@lru_cache(maxsize=1)
+def _pipeline():
+    # built on first use, not at import, so importing this module is cheap and testable
+    return build_rag_chain()
+
+
+def chat(user_input: str, history: list[dict] | None = None) -> Answer:
+    """Answer one message. `history` is the earlier conversation as
+    [{"role": "user" | "assistant", "content": "..."}], NOT including `user_input`."""
+    result = _pipeline().ask(user_input, history)
+    if os.getenv("CHATBOT_DEBUG"):
+        print(f"[reason={result.reason} top_score={result.top_score} standalone={result.standalone_question!r}]")
+        try:  # NER is not used for answering yet; kept as a debug signal
+            from entity_extractor import extract_entities
+            print(f"[entities={extract_entities(user_input)}]")
+        except Exception:  # noqa: BLE001
+            pass
+    return result
+
+
+def format_sources(sources) -> str:
+    lines = []
+    for s in sources:
+        label = s.title + (f" - {s.section}" if s.section else "")
+        lines.append(f"[{s.id}] {label}" + (f" ({s.url})" if s.url else ""))
+    return "\n".join(lines)
+
+
+def get_response(user_input: str, history: list[dict] | None = None) -> str:
+    """Plain-text convenience wrapper: answer plus a source list."""
+    result = chat(user_input, history)
+    if result.sources:
+        return f"{result.text}\n\nSources:\n{format_sources(result.sources)}"
+    return result.text
