@@ -1,16 +1,7 @@
-"""Input, context and output guards.
-
-Layered defence against prompt injection. The heuristics here are a speed bump,
-not a wall: the real protection is (a) the prompt treats retrieved text as
-untrusted data, (b) the bot has no tools or actions to abuse, and (c) every
-answer must cite a real retrieved source or it is replaced by a refusal.
-"""
 import re
 import secrets
 import unicodedata
 
-# Random per-process marker planted in the system prompt. It has no meaning to
-# users, so if it ever appears in an answer the prompt has leaked.
 CANARY = f"KX-{secrets.token_hex(6)}"
 
 _ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff"), None)
@@ -30,7 +21,6 @@ _INJECTION_PATTERNS = [
 ]
 _INJECTION_RE = re.compile("|".join(f"(?:{p})" for p in _INJECTION_PATTERNS), re.I | re.M)
 
-# Things in a chunk that could break out of our <source> wrapper or spoof a citation.
 _STRUCTURE_TAG = re.compile(r"</?\s*(?:sources?|system|assistant|human|user)\b[^>]*>", re.I)
 _CITATION_MARKER = re.compile(r"\[S\d+\]", re.I)
 
@@ -42,7 +32,6 @@ def _normalise(text: str) -> str:
 
 
 def clean_question(text: str, max_chars: int) -> str:
-    """Normalise unicode, drop control/zero-width chars, collapse whitespace, cap length."""
     text = re.sub(r"\s+", " ", _normalise(text)).strip()
     return text[:max_chars]
 
@@ -52,7 +41,6 @@ def looks_like_injection(text: str) -> bool:
 
 
 def sanitize_chunk(text: str) -> str:
-    """Neutralise anything in retrieved text that could spoof our prompt structure."""
     text = _STRUCTURE_TAG.sub("", _normalise(text))
     return _CITATION_MARKER.sub("", text).strip()
 
@@ -66,7 +54,6 @@ def leaked_prompt(answer: str) -> bool:
     return CANARY in (answer or "")
 
 
-# --- Small talk: answered without retrieval or an LLM call ------------------
 _GREETING = re.compile(r"^(?:hi+|hello+|hey+|good (?:morning|afternoon|evening)|yo|hiya)\b[\s!.,?]*$", re.I)
 _THANKS = re.compile(r"^(?:thanks?|thank you|thx|cheers|ta|much appreciated)\b[\s!.,?a-z]*$", re.I)
 _BYE = re.compile(r"^(?:bye+|goodbye|see you|cya|good night)\b[\s!.,?a-z]*$", re.I)

@@ -1,15 +1,3 @@
-"""Second-stage reranking.
-
-Hybrid retrieval is tuned for recall (fetch ~20 candidates from each retriever).
-A cross-encoder reads query and passage *together*, which is much more precise,
-so we use it to pick the few chunks the LLM actually sees, and to give us a real
-relevance score for the "don't answer" decision.
-
-FlashRank runs ONNX models on CPU - no torch, so it avoids the deep-learning
-import problems described in report.md. If it can't load (missing package,
-model download blocked, native-binary problem) we fall back to a no-op that
-keeps the hybrid retriever's order, and the pipeline still works.
-"""
 import logging
 from typing import Protocol
 
@@ -23,15 +11,13 @@ class Reranker(Protocol):
 
 
 class NoOpReranker:
-    """Keeps retrieval order. Scores are None, so the relevance gate is skipped."""
-
     def rerank(self, query, docs, top_n):
         return [(d, None) for d in docs[:top_n]]
 
 
 class FlashrankReranker:
     def __init__(self, model_name: str):
-        from flashrank import Ranker  # imported lazily so it stays optional
+        from flashrank import Ranker  
 
         self._ranker = Ranker(model_name=model_name)
 

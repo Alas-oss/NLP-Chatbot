@@ -1,11 +1,3 @@
-"""History-aware query rewriting.
-
-"What about for postgraduates?" is meaningless to a retriever on its own. We ask
-an LLM to turn a follow-up into a standalone search question using the recent
-conversation. No history means no LLM call. The rewritten text is only ever used
-as a search query, and is length-capped and validated, so a poisoned history can't
-do much with it.
-"""
 import logging
 import re
 
@@ -31,8 +23,6 @@ _CITATION = re.compile(r"\s*\[\d+\]")
 
 
 def format_history(history: list[dict], turns: int) -> str:
-    """Last `turns` exchanges as plain text. Assistant replies are trimmed: they're long
-    and only needed for context."""
     recent = [m for m in history if m.get("role") in ("user", "assistant")][-turns * 2:]
     lines = []
     for m in recent:
@@ -53,7 +43,6 @@ def _validate(rewritten: str, original: str, max_chars: int) -> str:
 
 def rewrite_question(question: str, history: list[dict] | None, llm, *, turns: int,
                      max_chars: int, config: dict | None = None) -> str:
-    """Return a standalone version of `question`, or `question` itself if anything goes wrong."""
     if not history:
         return question
     hist = format_history(history, turns)

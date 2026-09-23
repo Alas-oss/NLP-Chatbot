@@ -1,9 +1,3 @@
-"""Turns retrieved chunks into numbered sources, and validates the model's citations.
-
-The model is told to cite as [S1], [S2]... . We accept a citation only if it points
-at a source we actually gave the model, renumber the survivors 1..n in order of
-first appearance, and return just the sources that were cited.
-"""
 import os
 import re
 from dataclasses import dataclass, asdict
@@ -17,7 +11,7 @@ _MARKER = re.compile(r"\[\s*S(\d+(?:\s*,\s*S?\d+)*)\s*\]", re.I)
 
 @dataclass
 class Source:
-    id: int                     # 1-based position in the prompt (S1, S2, ...)
+    id: int                     
     title: str
     url: str | None
     section: str | None
@@ -33,7 +27,6 @@ def _title_from_metadata(meta: dict) -> str:
         return str(meta["title"])
     src = meta.get("source")
     if src:
-        # a file path today, a URL once web ingestion lands
         return os.path.splitext(os.path.basename(str(src).rstrip("/")))[0] or str(src)
     return "Untitled source"
 
@@ -57,7 +50,6 @@ def build_sources(docs: list[Document], scores: list[float | None]) -> list[Sour
 
 
 def format_context(docs: list[Document], sources: list[Source]) -> str:
-    """The <source> blocks placed in the prompt. Chunk text is sanitised first."""
     blocks = []
     for doc, src in zip(docs, sources):
         blocks.append(
@@ -67,12 +59,6 @@ def format_context(docs: list[Document], sources: list[Source]) -> str:
 
 
 def resolve_citations(answer: str, sources: list[Source]) -> tuple[str, list[Source]]:
-    """Validate [S#] markers against real sources.
-
-    Returns (clean_answer, cited_sources). Unknown ids are dropped from the text;
-    valid ones are renumbered [1], [2]... by first appearance. If nothing valid is
-    cited, cited_sources is empty and the caller should treat the answer as ungrounded.
-    """
     by_id = {s.id: s for s in sources}
     order: list[int] = []
 
@@ -91,7 +77,7 @@ def resolve_citations(answer: str, sources: list[Source]) -> tuple[str, list[Sou
         return "".join(f"[{n}]" for n in sorted(set(valid)))
 
     clean = _MARKER.sub(_replace, answer)
-    clean = re.sub(r"[ \t]+([.,;:!?])", r"\1", clean)   # tidy space left before punctuation
+    clean = re.sub(r"[ \t]+([.,;:!?])", r"\1", clean)   
     clean = re.sub(r"[ \t]{2,}", " ", clean).strip()
 
     cited = []

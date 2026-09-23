@@ -1,9 +1,3 @@
-"""RAG pipeline: guard -> rewrite -> retrieve -> filter -> rerank -> gate -> generate -> validate.
-
-Every early exit (blocked, low relevance, model says NO_ANSWER, no valid citation, prompt
-leak, error) returns a fixed message from config, so users never see raw model output
-that failed a check, and never see exception text.
-"""
 import logging
 import os
 from dataclasses import dataclass, field, asdict
@@ -45,9 +39,9 @@ _PROMPT = ChatPromptTemplate.from_messages([
 @dataclass
 class Answer:
     text: str
-    sources: list[Source] = field(default_factory=list)   # only sources the answer actually cites
+    sources: list[Source] = field(default_factory=list)  
     refused: bool = False
-    reason: str | None = None        # empty | blocked | low_relevance | no_answer | ungrounded | leak | error | smalltalk
+    reason: str | None = None      
     standalone_question: str | None = None
     top_score: float | None = None
 
@@ -61,7 +55,7 @@ def _content_text(result) -> str:
     content = getattr(result, "content", result)
     if isinstance(content, str):
         return content
-    if isinstance(content, list):   # some providers return content blocks
+    if isinstance(content, list):   
         return "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in content)
     return str(content)
 
@@ -80,7 +74,6 @@ class RagPipeline:
         self.history_turns = history_turns
         self.institution = institution
 
-    # -- helpers --------------------------------------------------------
     def _cfg(self, **metadata) -> dict | None:
         cfg = {}
         if self.callbacks:
@@ -92,7 +85,6 @@ class RagPipeline:
     def _refuse(self, message: str, reason: str, **kw) -> Answer:
         return Answer(text=message, refused=True, reason=reason, **kw)
 
-    # -- main entry -----------------------------------------------------
     def ask(self, question: str, history: list[dict] | None = None) -> Answer:
         question = clean_question(question, config.MAX_QUESTION_CHARS)
         if not question:
@@ -112,7 +104,7 @@ class RagPipeline:
                 turns=self.history_turns, max_chars=config.MAX_REWRITE_CHARS,
                 config=self._cfg(step="rewrite"),
             )
-            if looks_like_injection(standalone):     # a poisoned history could smuggle one in
+            if looks_like_injection(standalone):    
                 standalone = question
 
             candidates = self.retriever.invoke(standalone)
@@ -150,7 +142,6 @@ class RagPipeline:
             log.exception("Generation failed")
             return self._refuse(config.ERROR_MESSAGE, "error", **info)
 
-        # ---- output checks ----
         if leaked_prompt(raw):
             log.warning("Canary found in model output; discarding answer.")
             return self._refuse(config.BLOCKED_MESSAGE, "leak", **info)
@@ -168,7 +159,6 @@ class RagPipeline:
         return Answer(text=text, sources=cited, **info)
 
 
-# -- factory + tracing ----------------------------------------------------
 def _langfuse_callbacks() -> list:
     if not (os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY")):
         return []
