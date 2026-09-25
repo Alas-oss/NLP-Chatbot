@@ -1,0 +1,15 @@
+crawl: 
+  enabled: false
+
+  user_agent: "CHANGE-ME-Bot/0.1 (+mailto:you@example.com; university project)"
+
+  rate_limit_seconds: 2.0
+  max_pages: 50
+  request_timeout_seconds: 10
+
+allowlist: []
+
+seeds:
+  sitemaps: []
+
+  urls: []

@@ -2,7 +2,7 @@
 
 A chatbot that answers questions grounded in a specific source document, using a retrieval-augmented generation (RAG) pipeline rather than a fixed intent classifier or an ungrounded LLM. It combines semantic (embedding-based) search with keyword (BM25) search to find relevant passages, reranks them with a cross-encoder, and has an LLM generate an answer using only that retrieved context. Every answer's citations are validated against the sources actually retrieved before being shown to the user. Generations are traced via Langfuse for debugging and inspection.
 
-This started as a general-purpose document Q&A bot and is being extended to index public King's College London web content (policies, course information), so students can ask plain-language questions and get a short, sourced answer. That extension is still in planning.
+This started as a general-purpose document Q&A bot and is being extended to index public King's College London web content (policies, course information), so students can ask plain-language questions and get a short, sourced answer. That extension is still in planning - see [Status](#status) below.
 
 ## Why RAG instead of intent classification or a bare LLM
 
@@ -40,8 +40,10 @@ src/
 ingest.py                      -> root-level script: actually RUNS ingestion (see note below)
 data/build_kings_docx.py       -> one-off script that generates a sample source .docx (not tracked)
 app.py                         -> Streamlit chat UI
-tests/                         -> pytest suite covering guards, citations, rewriting, reranking, entities, the pipeline
+tests/                         -> pytest suite covering guards, citations, rewriting, reranking, entities, the crawler, the pipeline
 eval/                          -> golden-set evaluation: known questions + expected answers, graded against the real pipeline
+crawler/                       -> gated web crawler: disabled by default, see "Crawler" below
+sources.yaml                   -> crawler configuration: enabled=false, empty allowlist, until deliberately changed
 .github/workflows/test.yml     -> CI: runs the test suite on every push
 ```
 
@@ -112,6 +114,17 @@ The suite uses fake LLMs and retrievers throughout, so it runs without live API 
 uv run python eval/run_eval.py
 ```
 Unlike `tests/`, this needs real API keys and an ingested knowledge base - it's for judging answer quality after a change (a new prompt, a different threshold, a new reranker model), not for CI. Edit `eval/golden_set.json` to match whatever source document is currently indexed.
+
+## Crawler
+
+`src/crawler/` is a web crawler for extending this project to index public web content, kept deliberately separate from the rest of the pipeline and **disabled by default**. Two conditions must both be true, set explicitly in `sources.yaml`, before it makes a single HTTP request to any real page:
+
+1. `crawl.enabled: true`
+2. `allowlist` contains at least one domain
+
+Both are checked in code, not left as a convention. It uses [Protego](https://github.com/scrapy/protego) for robots.txt parsing (Python's built-in `urllib.robotparser` doesn't handle the `*` wildcard patterns real sites' robots.txt files rely on), discovers pages via XML sitemaps rather than by following links, rate-limits itself per domain, and has a dry-run mode (`--plan`) that shows exactly what it would fetch without fetching any page content. See `src/crawler/README.md` for details, and `tests/test_crawler_*.py` for the test suite, which never touches the real network - it runs entirely against a mocked HTTP transport, including tests that check King's actual published robots.txt wildcard rules are parsed correctly.
+
+No content has been crawled, fetched, or indexed from any real site using this code. `sources.yaml` ships with crawling disabled and an empty allowlist.
 
 ## Status
 
