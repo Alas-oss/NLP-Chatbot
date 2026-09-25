@@ -6,7 +6,7 @@ This started as a general-purpose document Q&A bot and is being extended to inde
 
 ## Why RAG instead of intent classification or a bare LLM
 
-An earlier version of this project used a TF-IDF classifier with a small, hand-written set of trained categories, falling back to an ungrounded LLM call for anything else. That approach works for narrow, repetitive queries but doesn't scale to open-ended questions about a specific body of knowledge, as a classifier has no way to "know" facts, and an ungrounded LLM call has no way to guarantee its answer reflects a particular source rather than general training knowledge. RAG solves this by retrieving the most relevant chunks of a source at query time and instructing the model to answer only from that retrieved context.
+An earlier version of this project used a TF-IDF classifier with a small, hand-written set of trained categories, falling back to an ungrounded LLM call for anything else. That approach works for narrow, repetitive queries but doesn't scale to open-ended questions about a specific body of knowledge - a classifier has no way to "know" facts, and an ungrounded LLM call has no way to guarantee its answer reflects a particular source rather than general training knowledge. RAG solves this by retrieving the most relevant chunks of a source at query time and instructing the model to answer only from that retrieved context.
 
 ## Guardrails
 
@@ -16,7 +16,7 @@ Because the eventual goal is answering real students' questions about university
 - **Relevance gate.** A cross-encoder reranker (FlashRank) scores each retrieved chunk against the query. If the best match scores below a threshold, the pipeline refuses before ever calling the LLM.
 - **Prompt injection resistance.** User input is checked against common injection patterns before retrieval runs. Retrieved chunks are checked the same way before being inserted into the prompt, so instructions hidden in a source document can't override the system's behaviour. A random per-session canary string detects and blocks any answer that leaks part of the system prompt.
 - **Degrades safely.** If the reranker or query rewriter fails to load or errors at runtime, the pipeline falls back to unranked retrieval or the original question rather than crashing.
-- **Tested.** `tests/` covers the guardrails above (injection detection, citation validation, relevance gating, error handling) with fake LLMs and retrievers, so the suite runs without live API keys.
+- **Tested.** `tests/` covers the guardrails above (injection detection, citation validation, relevance gating, error handling) with fake LLMs and retrievers, so the suite runs without live API keys, and runs automatically on every push via CI. `eval/` separately measures answer quality against a golden set of known questions, using the real pipeline.
 
 None of this is a substitute for a security review; it's the first layer.
 
@@ -33,14 +33,16 @@ src/
   reranker.py                   -> cross-encoder reranking (FlashRank), with a no-op fallback
   rewriter.py                   -> rewrites follow-up questions into standalone queries using history
   citations.py                  -> builds numbered sources, validates the model's citations against them
-  rag_chain.py                  -> prompt template + full pipeline (rewrite -> retrieve -> rerank -> gate -> generate -> validate)
+  entities.py                   -> spaCy NER: extracts entities, boosts chunks that share one with the query
+  rag_chain.py                  -> prompt template + full pipeline (rewrite -> retrieve -> rerank -> entity boost -> gate -> generate -> validate)
   dialogue_manager.py            -> the chatbot's response entrypoint, calls the RAG chain
-  entity_extractor.py           -> spaCy NER (currently a debug signal; not yet used in retrieval)
   chatbot.py                    -> the interactive terminal loop
 ingest.py                      -> root-level script: actually RUNS ingestion (see note below)
 data/build_kings_docx.py       -> one-off script that generates a sample source .docx (not tracked)
 app.py                         -> Streamlit chat UI
-tests/                         -> pytest suite covering guards, citations, rewriting, reranking, the pipeline
+tests/                         -> pytest suite covering guards, citations, rewriting, reranking, entities, the pipeline
+eval/                          -> golden-set evaluation: known questions + expected answers, graded against the real pipeline
+.github/workflows/test.yml     -> CI: runs the test suite on every push
 ```
 
 **Important structural note**: there are two files named `ingest.py`. The one at the repo root is a short script that calls the ingestion functions and produces `vector_store.json` / `chunks.json` - this is the one you run. `src/ingest.py` only defines those functions (`build_vector_store`, `load_vector_store`, `save_chunks`, `load_chunks`) and does nothing if run directly. This split exists so ingestion (expensive: real embedding API calls, run rarely) is cleanly separated from the reusable functions other modules import from.
@@ -51,11 +53,13 @@ tests/                         -> pytest suite covering guards, citations, rewri
 2. **Embedding & indexing** (`ingest.py`, both copies) - each chunk is embedded and written to an in-memory vector store (no compiled native dependencies; see `report.md` for why this replaced an earlier Chroma-based setup). The chunk list is also persisted separately so retrieval doesn't need to re-parse the source document on every run.
 3. **Query rewriting** (`rewriter.py`) - if there's prior conversation, the latest message is rewritten into a standalone question (e.g. "what about for postgraduates?" -> a full question) before retrieval. Skipped on the first message in a conversation.
 4. **Hybrid retrieval** (`retriever.py`) - the (rewritten) query is matched two ways simultaneously: semantic similarity search over the embeddings, and BM25 keyword search over the persisted chunks. Results are combined via weighted reciprocal rank fusion (60% semantic / 40% keyword).
-5. **Reranking & relevance gate** (`reranker.py`) - a cross-encoder reranks the combined candidates and narrows them to the top few. If the best score is below a threshold, the pipeline refuses to answer rather than guessing.
-6. **Grounded generation** (`rag_chain.py`) - the surviving chunks are inserted into a prompt that instructs the model to answer only from that context, cite each claim, and say so plainly when it doesn't have the relevant information.
-7. **Citation validation** (`citations.py`) - every citation in the model's answer is checked against a real retrieved source. Unrecognised citations are stripped; an answer with none left is treated as ungrounded and replaced with a refusal.
-8. **Tracing** (`rag_chain.py`) - generation calls are traced through Langfuse via a callback handler. Note: Langfuse's default LangChain integration typically captures the full prompt and completion, which includes the user's question - check a live trace in the Langfuse UI before relying on any particular privacy behaviour here.
-9. **Response** (`dialogue_manager.py`, `chatbot.py`, `app.py`) - the caller gets back the answer plus the list of sources actually cited. The terminal loop and Streamlit app both display these; a lightweight NER pass on the user's query runs as a debug signal but doesn't yet feed into retrieval.
+5. **Reranking** (`reranker.py`) - a cross-encoder reranks the combined candidates against the (rewritten) query.
+6. **Entity boost** (`entities.py`) - named entities (places, organisations, people) are extracted from the query and compared against the entities each chunk was tagged with at ingest time. Chunks sharing an entity with the query get a small score bump before the final cut, so an exact match on something like "Guy's Campus" isn't lost purely because the surrounding wording differs. This only reorders candidates already in the pool; the relevance gate below still uses the reranker's original score, not the boosted one.
+7. **Relevance gate** (`rag_chain.py`) - if the best remaining score is below a threshold, the pipeline refuses to answer rather than guessing.
+8. **Grounded generation** (`rag_chain.py`) - the surviving chunks are inserted into a prompt that instructs the model to answer only from that context, cite each claim, and say so plainly when it doesn't have the relevant information.
+9. **Citation validation** (`citations.py`) - every citation in the model's answer is checked against a real retrieved source. Unrecognised citations are stripped; an answer with none left is treated as ungrounded and replaced with a refusal.
+10. **Tracing** (`rag_chain.py`) - generation calls are traced through Langfuse via a callback handler. Note: Langfuse's default LangChain integration typically captures the full prompt and completion, which includes the user's question - check a live trace in the Langfuse UI before relying on any particular privacy behaviour here.
+11. **Response** (`dialogue_manager.py`, `chatbot.py`, `app.py`) - the caller gets back the answer plus the list of sources actually cited.
 
 ## Setup
 
@@ -99,7 +103,15 @@ uv run streamlit run app.py
 ```
 uv run pytest tests/
 ```
-The suite uses fake LLMs and retrievers throughout, so it runs without live API keys and without network access.
+The suite uses fake LLMs and retrievers throughout, so it runs without live API keys and without network access. It runs automatically on every push via GitHub Actions (`.github/workflows/test.yml`).
+
+## Evaluation
+
+`eval/` holds a small golden set of known questions with their expected answers or sources, and a script that runs them against the real pipeline (real API calls) and reports a pass rate:
+```
+uv run python eval/run_eval.py
+```
+Unlike `tests/`, this needs real API keys and an ingested knowledge base - it's for judging answer quality after a change (a new prompt, a different threshold, a new reranker model), not for CI. Edit `eval/golden_set.json` to match whatever source document is currently indexed.
 
 ## Status
 
