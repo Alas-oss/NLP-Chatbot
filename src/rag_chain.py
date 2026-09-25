@@ -7,6 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 import config
 from citations import Source, build_sources, format_context, resolve_citations
+from entities import boost_score, extract_entities
 from guards import CANARY, clean_question, leaked_prompt, looks_like_injection, smalltalk_reply
 from reranker import Reranker, build_reranker
 from retriever import build_hybrid_retriever
@@ -41,7 +42,7 @@ class Answer:
     text: str
     sources: list[Source] = field(default_factory=list)  
     refused: bool = False
-    reason: str | None = None      
+    reason: str | None = None   
     standalone_question: str | None = None
     top_score: float | None = None
 
@@ -55,7 +56,7 @@ def _content_text(result) -> str:
     content = getattr(result, "content", result)
     if isinstance(content, str):
         return content
-    if isinstance(content, list):   
+    if isinstance(content, list): 
         return "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in content)
     return str(content)
 
@@ -104,7 +105,7 @@ class RagPipeline:
                 turns=self.history_turns, max_chars=config.MAX_REWRITE_CHARS,
                 config=self._cfg(step="rewrite"),
             )
-            if looks_like_injection(standalone):    
+            if looks_like_injection(standalone):   
                 standalone = question
 
             candidates = self.retriever.invoke(standalone)
@@ -114,7 +115,17 @@ class RagPipeline:
                 log.warning("Dropped %d retrieved chunk(s) containing instruction-like text.",
                             len(candidates) - len(safe))
 
-            ranked = self.reranker.rerank(standalone, safe, self.top_n)
+            pool_n = min(len(safe), max(self.top_n * 3, self.top_n))
+            pool = self.reranker.rerank(standalone, safe, pool_n)
+
+            query_entities = extract_entities(standalone)
+            if query_entities and pool:
+                pool = sorted(
+                    pool,
+                    key=lambda pair: boost_score(query_entities, set(pair[0].metadata.get("entities", [])), pair[1]),
+                    reverse=True,
+                )
+            ranked = pool[: self.top_n]
         except Exception:  # noqa: BLE001
             log.exception("Retrieval failed")
             return self._refuse(config.ERROR_MESSAGE, "error")
@@ -165,7 +176,7 @@ def _langfuse_callbacks() -> list:
     try:
         from langfuse.langchain import CallbackHandler
         return [CallbackHandler()]
-    except Exception:  # noqa: BLE001 - tracing must never take the bot down
+    except Exception:  # noqa: BLE001 
         log.exception("Langfuse unavailable; continuing without tracing.")
         return []
 

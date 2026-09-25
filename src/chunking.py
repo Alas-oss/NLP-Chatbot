@@ -2,6 +2,9 @@ from docx import Document as DocxDocument
 from langchain_core.documents import Document
 from langchain_text_splitters.character import RecursiveCharacterTextSplitter
 
+from entities import extract_entities
+
+
 def load_docx_as_documents(path: str) -> list[Document]:
     docx = DocxDocument(path)
     full_text = "\n\n".join(p.text for p in docx.paragraphs if p.text.strip())
@@ -14,4 +17,7 @@ def chunk_documents(documents: list[Document]) -> list[Document]:
         chunk_overlap=80,
         separators=["\n\n", "\n", ". ", " ", ""],
     )
-    return splitter.split_documents(documents)
+    chunks = splitter.split_documents(documents)
+    for chunk in chunks:
+        chunk.metadata["entities"] = sorted(extract_entities(chunk.page_content))
+    return chunks
