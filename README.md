@@ -126,6 +126,21 @@ Both are checked in code, not left as a convention. It uses [Protego](https://gi
 
 No content has been crawled, fetched, or indexed from any real site using this code. `sources.yaml` ships with crawling disabled and an empty allowlist.
 
+## Rate limiting
+
+`app.py` caps how many messages one browser session can send in a rolling window (`config.RATE_LIMIT_MAX_MESSAGES` per `config.RATE_LIMIT_WINDOW_SECONDS`, 20 per 60s by default) using `src/rate_limit.py`. A message over the limit is rejected before it reaches retrieval or the LLM - no API cost is incurred for a message that's refused anyway. Because Streamlit gives each visitor their own session state, this limits one person, not the app for everyone. It is a basic safeguard against runaway cost and accidental spam, not a substitute for proper infrastructure-level rate limiting (e.g. at a reverse proxy) in a real deployment.
+
+## Known limitations
+
+Being upfront about what this project does not yet do:
+
+- **No real King's content.** Nothing has been crawled or indexed from kcl.ac.uk; the crawler exists but ships disabled (see "Crawler" above).
+- **Not load-tested.** The rate limiter caps individual sessions, but the app hasn't been tested under many concurrent users.
+- **English only.** No multi-language support.
+- **No authentication.** There's no login, so it can't answer questions about an individual's own records (grades, timetables, applications) and isn't designed to.
+- **Langfuse tracing may capture full questions.** See the Pipeline section above - this needs verifying against a live trace before any real deployment.
+- **The golden-set evaluation is a starting point**, not a comprehensive test of answer quality - `eval/golden_set.json` currently has a handful of sample questions, not a large, curated set.
+
 ## Status
 
 This is a personal/university project, currently a working pipeline over sample data. No King's College London web content has been collected, crawled, or indexed. Extending it to King's public pages is planned but pending approval from King's IT and web teams; see `report.md` for background on the design decisions so far.

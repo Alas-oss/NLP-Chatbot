@@ -8,6 +8,7 @@ MODEL_NAME = "groq:openai/gpt-oss-120b"
 
 EMBEDDING_MODEL = "gemini-embedding-001"
 CHAT_MODEL = "groq:openai/gpt-oss-120b"
+
 REWRITE_MODEL = os.getenv("REWRITE_MODEL", CHAT_MODEL)
 
 VECTOR_STORE_PATH = "vector_store.json"
@@ -20,13 +21,22 @@ RETRIEVAL_K = 20
 SEMANTIC_WEIGHT = 0.6
 BM25_WEIGHT = 0.4
 
-RERANK_TOP_N = 5         
+RERANK_TOP_N = 5        
 RERANKER = os.getenv("RERANKER", "flashrank")  
-RERANK_MODEL = "ms-marco-MiniLM-L-12-v2"       
+RERANK_MODEL = "ms-marco-MiniLM-L-12-v2"   
+
 MIN_RELEVANCE = float(os.getenv("MIN_RELEVANCE", "0.02"))
 
-HISTORY_TURNS = 4       
+HISTORY_TURNS = 4        
 MAX_QUESTION_CHARS = 1000
+
+
+RATE_LIMIT_MAX_MESSAGES = 20     
+RATE_LIMIT_WINDOW_SECONDS = 60  
+RATE_LIMIT_MESSAGE = (
+    "You're sending messages faster than I can handle right now. "
+    "Please wait a moment and try again."
+)
 MAX_REWRITE_CHARS = 300
 
 CHUNK_SIZE = 600
