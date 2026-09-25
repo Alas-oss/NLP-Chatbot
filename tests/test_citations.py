@@ -43,7 +43,7 @@ def test_years_in_brackets_untouched():
 def test_build_sources_metadata_fallbacks(docs):
     srcs = build_sources(docs, [0.9, 0.5, None])
     assert srcs[0].url == "https://example.org/campuses" and srcs[0].title == "Campuses"
-    assert srcs[2].title == "history" and srcs[2].url is None      # falls back to file name
+    assert srcs[2].title == "history" and srcs[2].url is None     
     assert [s.id for s in srcs] == [1, 2, 3]
 
 

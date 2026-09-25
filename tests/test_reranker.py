@@ -32,7 +32,6 @@ def test_flashrank_maps_scores_back_to_docs():
 
     class FakeRanker:
         def rerank(self, request):
-            # pretend passage 2 is best, then 0, then 1
             by_id = {p["id"]: p for p in request.passages}
             return [dict(by_id[2], score=0.9), dict(by_id[0], score=0.4), dict(by_id[1], score=0.1)]
 

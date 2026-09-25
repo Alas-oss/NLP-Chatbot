@@ -19,5 +19,5 @@ def test_hybrid_retriever_builds_from_injected_store_and_finds_keyword_hits():
     results = retriever.invoke("extenuating circumstances")
 
     titles = [d.metadata["title"] for d in results]
-    assert "A" in titles                       # BM25 leg finds the exact keyword match
-    assert len(results) == len({d.page_content for d in results})   # de-duplicated
+    assert "A" in titles                       
+    assert len(results) == len({d.page_content for d in results})  
