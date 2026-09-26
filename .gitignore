@@ -6,3 +6,4 @@ plan.md
 vector_store.json
 chunks.json
 .pytest_cache/
+data/kings_college_london.docx
