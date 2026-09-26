@@ -4,6 +4,7 @@ __pycache__/
 .env
 plan.md
 vector_store.json
-data/*
+data/kings_college_london.docx
 chunks.json
 .pytest_cache/
+data/build_kings_docx.py
