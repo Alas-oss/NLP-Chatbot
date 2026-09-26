@@ -2,6 +2,11 @@ from docx import Document
 
 doc = Document()
 doc.add_heading("King's College London - General Information", level=0)
+doc.add_paragraph(
+    "This is a sample information document assembled for demonstrating a "
+    "retrieval-augmented chatbot prototype. It is not an official King's College "
+    "London publication."
+)
 
 doc.add_heading("History and Founding", level=1)
 doc.add_paragraph(
@@ -9,182 +14,185 @@ doc.add_paragraph(
     "Duke of Wellington, making it one of the oldest universities in England. It "
     "was established, in part, as a Church of England response to the founding of "
     "the secular University College London a few years earlier. King's became one "
-    "of the founding constituent colleges of the University of London in 1836. "
-    "The university's motto is 'Sancte et Sapienter' — 'With Holiness and Wisdom'."
+    "of the two founding constituent colleges of the University of London in 1836. "
+    "The university's motto is 'Sancte et Sapienter' - 'With Holiness and Wisdom'."
+)
+doc.add_paragraph(
+    "King's grew substantially through mergers in the twentieth century, "
+    "including with Queen Elizabeth College and Chelsea College of Science and "
+    "Technology in 1985, the Institute of Psychiatry in 1997, and the medical and "
+    "dental schools of Guy's and St Thomas' Hospitals in 1998. King's gained the "
+    "power to award its own degrees independently of the University of London in "
+    "2007."
 )
 
 doc.add_heading("Campuses", level=1)
 doc.add_paragraph(
-    "King's operates across five main campuses in central London: the Strand Campus "
-    "(the historic main site, home to arts, humanities, artificial intelligence, and " \
-    "law), Guy's Campus (near London Bridge, focused on health and life sciences), St " \
-    "Thomas' Campus (opposite the Houses of Parliament, home to nursing and midwifery), " \
-    "Waterloo Campus (social sciences, public policy, computer science, and natural " \
-    "sciences), and Denmark Hill Campus (south London, focused on medical, dental, and " \
-    "psychiatric research alongside King's College Hospital)."
+    "King's operates across five main campuses in central London: the Strand "
+    "Campus (the historic main site, home to arts and humanities, informatics, "
+    "and law), Guy's Campus (near London Bridge, focused on health and life "
+    "sciences), St Thomas' Campus (opposite the Houses of Parliament, home to "
+    "nursing and midwifery), Waterloo Campus (social sciences, public policy, "
+    "computer science, and natural sciences), and Denmark Hill Campus (south "
+    "London, focused on medical, dental, and psychiatric research alongside "
+    "King's College Hospital)."
 )
 
 doc.add_heading("Faculties and Schools", level=1)
 doc.add_paragraph(
     "King's is organised into nine faculties: the Faculty of Arts & Humanities; "
-    "the Faculty of Dentistry, Oral & Craniofacial Sciences; the Faculty of Life "
-    "Sciences & Medicine; the Faculty of Natural, Mathematical & Engineering "
-    "Sciences; the Faculty of Nursing, Midwifery & Palliative Care; the Faculty "
-    "of Social Science & Public Policy; the Institute of Psychiatry, Psychology "
-    "& Neuroscience; King's Business School; and The Dickson Poon School of Law."
+    "King's Business School; the Faculty of Dentistry, Oral & Craniofacial "
+    "Sciences; The Dickson Poon School of Law; the Faculty of Life Sciences & "
+    "Medicine; the Faculty of Natural, Mathematical & Engineering Sciences; the "
+    "Florence Nightingale Faculty of Nursing, Midwifery & Palliative Care; the "
+    "Institute of Psychiatry, Psychology & Neuroscience (IoPPN); and the Faculty "
+    "of Social Science & Public Policy."
+)
+
+doc.add_heading("Governance and Leadership", level=1)
+doc.add_paragraph(
+    "The Chancellor of the University of London, and by extension of King's, is "
+    "Anne, the Princess Royal. King's is led day-to-day by its President & "
+    "Principal, a role held by Professor Shitij Kapur. King's is a self-governing "
+    "institution within the federal University of London, with its own Council "
+    "responsible for institutional governance."
+)
+
+doc.add_heading("King's Health Partners", level=1)
+doc.add_paragraph(
+    "King's is a founding member of King's Health Partners, one of a small "
+    "number of Academic Health Sciences Centres in the UK. The partnership "
+    "brings together King's College London with Guy's and St Thomas', King's "
+    "College Hospital, and South London and Maudsley NHS Foundation Trusts, "
+    "combining research, education, and clinical care across south London's "
+    "teaching hospitals."
 )
 
 doc.add_heading("Notable History and Contributions", level=1)
 doc.add_paragraph(
     "King's has a strong historical connection to major scientific and medical "
     "milestones. Florence Nightingale founded the world's first official nursing "
-    "school at King's in 1860. Researchers at King's, including Rosalind "
-    "Franklin and Maurice Wilkins, produced X-ray diffraction images central to "
-    "discovering the double-helix structure of DNA in the 1950s. The Nightingale "
-    "legacy continues through the Florence Nightingale Faculty of Nursing, "
-    "Midwifery & Palliative Care."
+    "school at King's in 1860, a legacy continued today through the Florence "
+    "Nightingale Faculty of Nursing, Midwifery & Palliative Care. Researchers at "
+    "King's, including Rosalind Franklin and Maurice Wilkins, produced X-ray "
+    "diffraction images central to discovering the double-helix structure of DNA "
+    "in the 1950s; Wilkins shared the 1962 Nobel Prize in Physiology or Medicine "
+    "for this work."
 )
 
-doc.add_heading("Rankings and Reputation", level=1)
+doc.add_heading("Notable Alumni and Nobel Laureates", level=1)
 doc.add_paragraph(
-    "King's is a member of the Russel Group of research-intensive UK " \
-    "universities and is consistently ranked among the top universities " \
-    "globally, particularly strong in medicine, dentistry, law, the humanities, " \
-    " and an active research department in computer science and artificial " \
-    "intelligence. It was historically one of the founding colleges of the" \
-    " federal University of London, though it has operated with significant " \
-    "independence, including awarding its own degrees since 2007."
+    "King's counts fourteen Nobel laureates among its alumni and former staff, "
+    "spanning physics, chemistry, medicine, and peace. These include physicist "
+    "Peter Higgs, who studied for his bachelor's, master's, and doctorate at "
+    "King's in the 1950s and proposed the mechanism behind the Higgs boson "
+    "(Physics, 2013); Sir Michael Houghton, recognised for his research into "
+    "Hepatitis C (Medicine, 2020); and Michael Levitt, recognised for his work on "
+    "computational modelling of chemical processes (Chemistry, 2013). Archbishop "
+    "Desmond Tutu, who studied theology at King's in the 1960s, later received "
+    "the Nobel Peace Prize in 1984 for his work against apartheid in South "
+    "Africa."
+)
+doc.add_paragraph(
+    "Beyond the sciences, King's alumni include prominent figures in politics, "
+    "law, literature, and the arts. Sir Keir Starmer, the current UK Prime "
+    "Minister, studied at King's. In literature, alumni include author and "
+    "children's writer Sir Michael Morpurgo and writer and philosopher Alain de "
+    "Botton. In music, Queen bassist John Deacon studied electronics at Chelsea "
+    "College, which later merged into King's. Olympic medallists Dame Katherine "
+    "Grainger (rowing) and Dina Asher-Smith (sprinting) also studied at the "
+    "university."
+)
+
+doc.add_heading("Scale and Student Body", level=1)
+doc.add_paragraph(
+    "King's is one of the largest universities in the UK by enrolment. As of the "
+    "2024/25 academic year, King's reported a total student population of "
+    "around 40,900, made up of roughly 23,200 undergraduates and 17,700 "
+    "postgraduates, with a substantial international student population "
+    "reflecting London's global character."
+)
+
+doc.add_heading("Rankings and Research Strength", level=1)
+doc.add_paragraph(
+    "King's is a member of the Russell Group of research-intensive UK "
+    "universities and is consistently ranked among the top universities "
+    "globally and among the top handful in the UK, particularly strong in "
+    "medicine, dentistry, law, nursing, psychology, and the humanities. In "
+    "2024/25, King's reported a total income of around 1.38 billion pounds, of "
+    "which roughly 260 million pounds came from research grants and contracts, "
+    "and it holds the fourth-largest endowment of any UK university."
+)
+
+doc.add_heading("Golden Triangle and London Context", level=1)
+doc.add_paragraph(
+    "King's is often described as part of the UK's 'Golden Triangle' of leading "
+    "research universities, a term referring to institutions concentrated in and "
+    "around London, Oxford, and Cambridge, alongside institutions such as UCL, "
+    "Imperial College London, and the London School of Economics. Its location "
+    "gives it close ties to London's legal, financial, medical, and cultural "
+    "institutions."
+)
+
+doc.add_heading("Notable Buildings", level=1)
+doc.add_paragraph(
+    "The Strand Campus is built around King's original 1829 building next to "
+    "Somerset House; The Dickson Poon School of Law is based in Somerset House's "
+    "East Wing. The Maughan Library on Chancery Lane, King's largest library, "
+    "occupies the former Public Record Office building. King's Chapel on the "
+    "Strand Campus has served the college community for over 150 years."
 )
 
 doc.add_heading("Student Life", level=1)
 doc.add_paragraph(
     "King's College London Students' Union (KCLSU) runs student societies, "
     "sports clubs, and campus events across all five campuses. The university "
-    "has a large international student population, reflecting London's global "
-    "character, and offers halls of residence across multiple London locations."
-)
-
-doc.add_heading("Notable Alumni", level=1)
-doc.add_paragraph(
-    "King's College London counts among its alumni fourteen Nobel laureates across " \
-    "physics, chemistry, meidcine and physiology, reflecting its historically " \
-    "strong medical and scientific faculties. Physicist Preter Higgs, who proposed " \
-    "the mechanism behind the Higgs boson, is among the most well known, alongside " \
-    "Sir Michael Houghton (medicine, for reasearch into Hepatitis C) and Michael " \
-    "Levitt (Chemistry, for work on computational modelling for chemical processes). " \
-    "Archbishop Desmond Tutu, who studied theology at King's later recieved the " \
-    "Nobel Peace Prize for his work against apartheid in South Africa."
-)
-
-doc.add_paragraph(
-    "Beyond the sciences, King's alumni include prominent figures in politics, " \
-    "law, literature, and the arts. Sir Keir Starmer studied at King's before " \
-    "becoming a prominent figure in UK politics. In literature, alumni include " \
-    "author and children's writer Michael Morpurgo and philosopher and writer " \
-    "Alain de Botton. In music, Queen bassist John Deacon studied electronics " \
-    "at King's. Olympic medalist Katherine Grainer (rowing) and Dina " \
-    "Asher-smith (sprinting) also studied at the university."
-)
-
-doc.add_heading("Scale and Student Body", level=1)
-doc.add_paragraph(
-    "King's is one of the largest universities in the UK by enrolment, with a " \
-    "total student population generally reported in the region of 40,000 or more, " \
-    "including a substantial international makeup is frequently highlighted in " \
-    "university rankings as a particular strength of King's global engagement, " \
-    "alongside its extensive international research partnerships."
-)
-
-doc.add_heading("Rankings and Research Strength", level=1)
-doc.add_paragraph(
-    "King's consistently places among the top unversities globally across major " \
-    "ranking systems such as QS, Times Higher Education, and the Academic Ranking " \
-    "of World Universities, typically appearing within the global top 30-60 " \
-    "Depending on the specific ranking and year, and generally among the top five " \
-    "or six universities in the United Kingdom. It is particularly well regarded "
-    "in subject-specific rankings for medicine, dentistry, nursing, law and " \
-    "psychology, with a number of individual subjects ranking in the global top " \
-    "15 in recent QS subject rankings."
-)
-
-doc.add_paragraph(
-    "In the UK's Research Excellence Framework (REF), King's has ranked among the " \
-    "top handful of UK universities for overall research power, reflecting both " \
-    "the volume and quality of research produced across its faculties. Its annual " \
-    "research income runs into the hundreds of millions of poinds, supporting " \
-    "work across its medical, scientific, and social science departments, " \
-    "including at its affiliated teaching hospitals."
-)
-
-doc.add_heading("Golden Triangle and London Context", level=1)
-doc.add_paragraph(
-    "King's is often described as part of the UK's 'Golden Triangle' of leading " \
-    "research universities, a term referring to institutions concentrated in and " \
-    "around London, Oxford, and Cambridge. Its location gives it close ties to " \
-    "London's legal, financial medical, and cultural institutions, and London " \
-    "itself is regularly ranked among the best cities in the world for students, " \
-    "a factor King's frequently highlights in its own promotional material."
+    "has a large international student population and offers halls of "
+    "residence across multiple London locations."
 )
 
 doc.add_heading("Sports and Athletics", level=1)
 doc.add_paragraph(
-    "King's fields a large number of student sports clubs under King's Sport and " \
-    "the King's College London Student's Union (KCLSU), competing mainly through " \
-    "British Universities and College Sport (BUCS), the main governing body "
-    "for university sport in the UK. Clubs range from competitive teams playing in " \
-    "structured BUCS leagues to purely recreational and social clubs aimed at " \
-    "fitness and skill-building rather than ocmpetition."
+    "King's fields a large number of student sports clubs under King's Sport "
+    "and KCLSU, competing mainly through British Universities and Colleges "
+    "Sport (BUCS), the main governing body for university sport in the UK. Clubs "
+    "range from competitive teams playing in structured BUCS leagues to "
+    "recreational and social clubs aimed at fitness and skill-building rather "
+    "than competition."
 )
 doc.add_paragraph(
-    "The centerpiece of King's sporting is the London Varsity Series, an " \
-    "annual set of matches against University College London (UCL), King's " \
-    "closest historical rival, help across multiple sports and drawing large " \
-    "student crowds. A related fixture, the Macadam Cup, pits King's teams " \
-    "against Guy's, King's and St Thomas' School of Medicine (GKT) teams."
+    "The centrepiece of King's sporting calendar is the London Varsity Series, "
+    "an annual set of matches against University College London (UCL), King's "
+    "closest historical rival. The rivalry between the two institutions dates "
+    "back to their founding in the 1820s; the modern Varsity began as a single "
+    "rugby match and has since grown into a week-long, multi-sport series "
+    "contested for the Jeremy George Cup. A related fixture, the Macadam Cup, "
+    "pits King's teams against Guy's, King's and St Thomas' School of Medicine "
+    "(GKT) teams."
 )
 doc.add_paragraph(
-    "King's College London Rugby Football Club, founded in 1869, is one of the " \
-    "university's oldest sports clubs and competes in BUCS leagues, playing its " \
-    "home matches at New Malden Sports Ground. A separate, even older rugby " \
-    "club associated with King's medical school, GKT Men's Rugby (dating to " \
-    "1843), is also linked to the founding of the Rugby Football Union itself. " \
-    "King's also has an active rowing club, King's College London Goat Club, " \
-    "based on the Thames near Chiswick, with a history stretching back to the " \
-    "1930s and past wins at the Henley Royal Regatta."
-)
-
-doc.add_heading("Computer Science, Informatics, and Artificial Intelliigence", level=1)
-doc.add_paragraph(
-    "Computer science and AI research and teaching at King's is centred in the " \
-    "Department of Informatics, part of the Faculty of Natural, Mathematical & " \
-    "Engineering Sciences. The department offers both undergraduate and " \
-    "postgraduate taught degrees, alongside MPhil and PhD research degrees, and " \
-    "maintains an active research profile with externally funded projects and " \
-    "strong links to industry, government, and other academic institutions."
-)
-doc.add_paragraph(
-    "King's has a dedicated King's Institute for Artificial Intelligence, which " \
-    "coordinates AI-related research and events across the university, " \
-    "including an anunual Festival of AI. Reserach within the department spans " \
-    "areas such as machine learning, autonomous systems, robotics, and the " \
-    "application of AI to fields including healthcare, finance, smart cities, " \
-    "and energy systems, alongside a strong emphasis on AI sefety and " \
-    "trustworthiness. Students on AI and computer science programmes have " \
-    "opportunities to work on real industry projects, including partnerships " \
-    "with major technologt companies."
+    "King's College London Rugby Football Club, founded in 1869, is one of the "
+    "university's oldest sports clubs, was among the founding member clubs of "
+    "the Rugby Football Union, and competes in BUCS leagues, playing its home "
+    "matches at New Malden Sports Ground."
 )
 
-doc.add_heading("Additional Notable Facts", level=1)
+doc.add_heading("Computer Science, Informatics, and Artificial Intelligence", level=1)
 doc.add_paragraph(
-    "King's has run large-scale philanthropic fundraising campaigns, including " \
-    "one launched in 2010 that raised several hundred million pounds to " \
-    "support scholarships, research, and a range of leadership and service " \
-    "initiatives across the university. King's is also frequently cited " \
-    "alongside Oxford, Cambridge, UCL, Imperial College London, and the London " \
-    "School of Economics as one of the UK's most research-intensive " \
-    "insitutions, forming part of what is often called the 'Golden Triangle' " \
-    "of elite British universities concentrated around London, Oxford, and " \
-    "Cambridge."
+    "Computer science and AI research and teaching at King's is centred in the "
+    "Department of Informatics, part of the Faculty of Natural, Mathematical & "
+    "Engineering Sciences. The department offers undergraduate and postgraduate "
+    "taught degrees alongside MPhil and PhD research degrees, and maintains an "
+    "active research profile with externally funded projects and links to "
+    "industry, government, and other academic institutions."
+)
+doc.add_paragraph(
+    "King's has a dedicated King's Institute for Artificial Intelligence, which "
+    "coordinates AI-related research and events across the university. Research "
+    "within the department spans areas such as machine learning, autonomous "
+    "systems, robotics, and the application of AI to fields including "
+    "healthcare, finance, and smart cities, alongside a strong emphasis on AI "
+    "safety and trustworthiness."
 )
 
 doc.save("data/kings_college_london.docx")
