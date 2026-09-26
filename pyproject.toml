@@ -24,3 +24,8 @@ dependencies = [
     "spacy>=3.8.13",
     "streamlit>=1.59.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
