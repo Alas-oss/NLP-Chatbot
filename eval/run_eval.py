@@ -1,6 +1,8 @@
 import argparse
 import json
+import re
 import sys
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -19,6 +21,13 @@ class CaseResult:
     debug: dict = field(default_factory=dict)   
 
 
+def _norm(text: str) -> str:
+    text = unicodedata.normalize("NFKC", text or "")
+    text = (text.replace("\u2019", "'").replace("\u2018", "'")
+                .replace("\u201c", '"').replace("\u201d", '"'))
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
 def grade(case: dict, answer) -> CaseResult:
     q = case["question"]
 
@@ -30,8 +39,9 @@ def grade(case: dict, answer) -> CaseResult:
     if answer.refused:
         return CaseResult(q, False, f"refused unexpectedly ({answer.reason})", True, answer.text)
 
+    answer_norm = _norm(answer.text)
     missing = [s for s in case.get("expect_answer_contains", [])
-               if s.lower() not in answer.text.lower()]
+               if _norm(s) not in answer_norm]
     if missing:
         return CaseResult(q, False, f"answer missing expected text: {missing}", False, answer.text)
 

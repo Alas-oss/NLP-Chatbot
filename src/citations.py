@@ -15,7 +15,7 @@ _MARKER = re.compile(
 
 @dataclass
 class Source:
-    id: int                   
+    id: int
     title: str
     url: str | None
     section: str | None
@@ -63,6 +63,7 @@ def format_context(docs: list[Document], sources: list[Source]) -> str:
 
 
 def resolve_citations(answer: str, sources: list[Source]) -> tuple[str, list[Source]]:
+    answer = re.sub(r"[\u00a0\u2007\u2009\u202f]", " ", answer)
     by_id = {s.id: s for s in sources}
     order: list[int] = []
 

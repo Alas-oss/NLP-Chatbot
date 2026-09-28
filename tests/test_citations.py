@@ -92,3 +92,9 @@ def test_drifted_format_with_invented_id_is_still_rejected():
     text, cited = resolve_citations("Claim (S42).", _sources())
     assert cited == []
     assert "S42" not in text
+
+
+def test_narrow_and_nonbreaking_spaces_are_normalised():
+    text, cited = resolve_citations("Fact\u202fone\u00a0here\u202f[S1].", _sources())
+    assert text == "Fact one here [1]."
+    assert cited
