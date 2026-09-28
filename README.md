@@ -23,7 +23,7 @@ None of this is a substitute for a security review; it's the first layer.
 ## Architecture
 
 ```
-data/                          -> source document(s) (not tracked in git)
+data/                          -> sample source document (generated locally, gitignored)
 src/
   config.py                     -> models, thresholds, and user-facing messages, in one place
   guards.py                     -> input cleaning, injection detection, prompt-leak detection
@@ -34,15 +34,16 @@ src/
   rewriter.py                   -> rewrites follow-up questions into standalone queries using history
   citations.py                  -> builds numbered sources, validates the model's citations against them
   entities.py                   -> spaCy NER: extracts entities, boosts chunks that share one with the query
+  rate_limit.py                 -> sliding-window rate limiter used by the Streamlit app
+  crawler/                      -> gated web crawler: disabled by default, see "Crawler" below
   rag_chain.py                  -> prompt template + full pipeline (rewrite -> retrieve -> rerank -> entity boost -> gate -> generate -> validate)
   dialogue_manager.py            -> the chatbot's response entrypoint, calls the RAG chain
   chatbot.py                    -> the interactive terminal loop
 ingest.py                      -> root-level script: actually RUNS ingestion (see note below)
-data/build_kings_docx.py       -> one-off script that generates a sample source .docx (not tracked)
+data/build_kings_docx.py       -> generates the sample source document data/kings_college_london.docx
 app.py                         -> Streamlit chat UI
 tests/                         -> pytest suite covering guards, citations, rewriting, reranking, entities, the crawler, the pipeline
 eval/                          -> golden-set evaluation: known questions + expected answers, graded against the real pipeline
-crawler/                       -> gated web crawler: disabled by default, see "Crawler" below
 sources.yaml                   -> crawler configuration: enabled=false, empty allowlist, until deliberately changed
 .github/workflows/test.yml     -> CI: runs the test suite on every push
 ```
@@ -76,16 +77,18 @@ GOOGLE_API_KEY=your_google_api_key
 GROQ_API_KEY=your_groq_api_key
 LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
 LANGFUSE_SECRET_KEY=your_langfuse_secret_key
-LANGFUSE_HOST=your_langfuse_host_key
+LANGFUSE_HOST=your_langfuse_host_url
 ```
-Langfuse variables are optional; tracing is skipped if they're not set.
+Langfuse variables are optional; tracing is skipped if they're not set. Never commit `.env` (it is gitignored).
 
 ## Building the knowledge base
 
-Place a source `.docx` in `data/` (not committed - project-specific and swappable), then, **from the repo root**:
+The sample source document is not committed; generate it first, then ingest it. **From the repo root:**
 ```
-uv run python ingest.py
+uv run python data/build_kings_docx.py    # writes data/kings_college_london.docx
+uv run python ingest.py                    # embeds it (needs GOOGLE_API_KEY)
 ```
+To use a different document, replace the file path in the root `ingest.py`.
 This writes `vector_store.json` and `chunks.json` at the repo root. Re-run only when the source document changes.
 
 ## Running the chatbot
@@ -143,4 +146,4 @@ Being upfront about what this project does not yet do:
 
 ## Status
 
-This is a personal/university project, currently a working pipeline over sample data. No King's College London web content has been collected, crawled, or indexed. Extending it to King's public pages is planned but pending approval from King's IT and web teams; see `report.md` for background on the design decisions so far.
+This is a personal/university project, currently a working pipeline over a sample document (`data/build_kings_docx.py`) that summarises publicly available facts about King's and is not an official King's publication. No King's College London web content has been collected, crawled, or indexed. Extending it to King's public pages is planned but pending approval from King's IT and web teams; see `report.md` for background on the design decisions so far.

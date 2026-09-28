@@ -40,14 +40,16 @@ _PROMPT = ChatPromptTemplate.from_messages([
 @dataclass
 class Answer:
     text: str
-    sources: list[Source] = field(default_factory=list)  
+    sources: list[Source] = field(default_factory=list)   
     refused: bool = False
-    reason: str | None = None   
+    reason: str | None = None       
     standalone_question: str | None = None
     top_score: float | None = None
+    debug: dict = field(default_factory=dict, repr=False)
 
     def to_dict(self) -> dict:
         d = asdict(self)
+        d.pop("debug", None)
         d["sources"] = [s.to_dict() for s in self.sources]
         return d
 
@@ -131,7 +133,15 @@ class RagPipeline:
             return self._refuse(config.ERROR_MESSAGE, "error")
 
         top_score = ranked[0][1] if ranked else None
-        info = dict(standalone_question=standalone, top_score=top_score)
+        debug = {
+            "candidates": len(candidates),
+            "context": [
+                {"score": None if sc is None else round(float(sc), 4),
+                 "text": " ".join(d.page_content.split())[:90]}
+                for d, sc in ranked
+            ],
+        }
+        info = dict(standalone_question=standalone, top_score=top_score, debug=debug)
 
         if not ranked:
             return self._refuse(config.REFUSAL_MESSAGE, "low_relevance", **info)
@@ -149,6 +159,7 @@ class RagPipeline:
                             num_context_chunks=len(docs), top_score=top_score,
                             question_length=len(question), rewritten=standalone != question)
             raw = _content_text(self.llm.invoke(messages, config=cfg) if cfg else self.llm.invoke(messages))
+            debug["raw_output"] = raw
         except Exception:  # noqa: BLE001
             log.exception("Generation failed")
             return self._refuse(config.ERROR_MESSAGE, "error", **info)
@@ -176,7 +187,7 @@ def _langfuse_callbacks() -> list:
     try:
         from langfuse.langchain import CallbackHandler
         return [CallbackHandler()]
-    except Exception:  # noqa: BLE001 
+    except Exception:  # noqa: BLE001
         log.exception("Langfuse unavailable; continuing without tracing.")
         return []
 

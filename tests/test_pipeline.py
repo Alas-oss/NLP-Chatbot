@@ -151,3 +151,27 @@ def test_no_query_entities_leaves_rerank_order_unchanged(docs):
     p, _ = make(docs, llm, scores=(0.9, 0.5, 0.2), top_n=1)
     a = p.ask("what time does it open") 
     assert a.sources[0].snippet.startswith("The Strand Campus")
+
+
+def test_debug_captures_raw_output_and_context_on_an_ungrounded_refusal(docs):
+    p, _ = make(docs, FakeLLM("The campus is historic and large."))  
+    a = p.ask("Tell me about the Strand Campus")
+    assert a.reason == "ungrounded"
+    assert a.debug["raw_output"] == "The campus is historic and large."
+    assert len(a.debug["context"]) == 3
+    assert {"score", "text"} <= set(a.debug["context"][0])
+
+
+def test_debug_is_never_serialised_for_end_users(docs):
+    p, _ = make(docs, FakeLLM("Fact [S1]."))
+    a = p.ask("Where is the Strand Campus?")
+    assert a.debug                     
+    assert "debug" not in a.to_dict() 
+
+
+def test_drifted_citation_format_now_yields_a_grounded_answer(docs):
+    p, _ = make(docs, FakeLLM("The Strand Campus is the historic main site (Source: S1)."))
+    a = p.ask("Where is the Strand Campus?")
+    assert not a.refused
+    assert a.text == "The Strand Campus is the historic main site [1]."
+    assert a.sources and a.sources[0].url == "https://example.org/campuses"

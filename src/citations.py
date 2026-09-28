@@ -6,12 +6,16 @@ from langchain_core.documents import Document
 
 from guards import sanitize_chunk, sanitize_title
 
-_MARKER = re.compile(r"\[\s*S(\d+(?:\s*,\s*S?\d+)*)\s*\]", re.I)
+_MARKER = re.compile(
+    r"[\[\(\u3010\uff3b]\s*(?:sources?\s*:?\s*S?|S)\s*\d+"
+    r"(?:\s*(?:,|;|&|and)\s*(?:S\s*)?\d+)*\s*[\]\)\u3011\uff3d]",
+    re.I,
+)
 
 
 @dataclass
 class Source:
-    id: int                     
+    id: int                   
     title: str
     url: str | None
     section: str | None
@@ -63,7 +67,7 @@ def resolve_citations(answer: str, sources: list[Source]) -> tuple[str, list[Sou
     order: list[int] = []
 
     def _ids(match: re.Match) -> list[int]:
-        return [int(x) for x in re.findall(r"\d+", match.group(1))]
+        return [int(x) for x in re.findall(r"\d+", match.group(0))]
 
     for m in _MARKER.finditer(answer):
         for sid in _ids(m):
@@ -77,7 +81,7 @@ def resolve_citations(answer: str, sources: list[Source]) -> tuple[str, list[Sou
         return "".join(f"[{n}]" for n in sorted(set(valid)))
 
     clean = _MARKER.sub(_replace, answer)
-    clean = re.sub(r"[ \t]+([.,;:!?])", r"\1", clean)   
+    clean = re.sub(r"[ \t]+([.,;:!?])", r"\1", clean)  
     clean = re.sub(r"[ \t]{2,}", " ", clean).strip()
 
     cited = []
