@@ -61,7 +61,7 @@ sources.yaml                   -> crawler configuration: enabled=false, empty al
 7. **Relevance gate** (`rag_chain.py`) - if the best remaining score is below a threshold, the pipeline refuses to answer rather than guessing.
 8. **Grounded generation** (`rag_chain.py`) - the surviving chunks are inserted into a prompt that instructs the model to answer only from that context, cite each claim, and say so plainly when it doesn't have the relevant information.
 9. **Citation validation** (`citations.py`) - every citation in the model's answer is checked against a real retrieved source. Unrecognised citations are stripped; an answer with none left is treated as ungrounded and replaced with a refusal.
-10. **Tracing** (`rag_chain.py`) - generation calls are traced through Langfuse via a callback handler. Note: Langfuse's default LangChain integration typically captures the full prompt and completion, which includes the user's question - check a live trace in the Langfuse UI before relying on any particular privacy behaviour here.
+10. **Tracing** (`rag_chain.py`) - generation calls are traced through Langfuse via a callback handler. **Confirmed by inspecting a live trace:** each trace records the full system prompt (including the retrieved source chunks verbatim and the internal canary marker used to detect prompt leaks), the user's exact question text, the model's full reasoning content, and its final answer - nothing is redacted. Tracing is opt-in: it only runs if `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` are set in `.env`, and is skipped entirely otherwise. Before indexing any real King's content or accepting real student input, decide whether this level of logging is acceptable, and if not, either leave the Langfuse keys unset or configure input/output masking on the Langfuse side.
 11. **Response** (`dialogue_manager.py`, `chatbot.py`, `app.py`) - the caller gets back the answer plus the list of sources actually cited.
 
 ## Setup
@@ -141,7 +141,7 @@ Being upfront about what this project does not yet do:
 - **Not load-tested.** The rate limiter caps individual sessions, but the app hasn't been tested under many concurrent users.
 - **English only.** No multi-language support.
 - **No authentication.** There's no login, so it can't answer questions about an individual's own records (grades, timetables, applications) and isn't designed to.
-- **Langfuse tracing may capture full questions.** See the Pipeline section above - this needs verifying against a live trace before any real deployment.
+- **Langfuse tracing, when enabled, logs everything.** Confirmed via a live trace: the full question, the full system prompt (including retrieved source content and the internal canary marker), the model's reasoning, and the answer are all recorded with no redaction. It is opt-in (skipped if the Langfuse keys are unset), but if enabled with real student questions, this needs a data-protection review and likely masking/redaction before any real deployment.
 - **The golden-set evaluation is a starting point**, not a comprehensive test of answer quality - `eval/golden_set.json` currently has a handful of sample questions, not a large, curated set.
 
 ## Status
