@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simulation — King's Information Assistant (embeddable widget concept)</title>
+    <meta name="description" content="A front-end-only simulation of how the RAG chatbot could appear as an embeddable widget on a King's College London webpage. No backend, no real King's data.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="sim-banner">
+        <strong>SIMULATION</strong> — a front-end mockup of the proposed embeddable widget. No backend, no real King's data, no network calls. See source comments for details.
+    </div>
+
+    <header class="site">
+        <div class="wordmark">King's College London <span>· Student Hub</span></div>
+        <nav class="site">
+         <a href="#">Study</a>
+         <a href="#">Student Services</a>
+         <a href="#">About</a>
+         </nav>
+    </header>
+
+    <main>
+    <div class="hero">
+        <h1>Find information faster.</h1>
+        <p>
+        A mockup of one page on King's site, with the proposed information
+        assistant embedded in the bottom-right corner — the same way it could
+        sit on any existing King's page via a single script tag, without
+        changing the page itself. Try the widget.
+        </p>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+        <h3>Student Policies</h3>
+        <p>Extenuating circumstances, academic regulations, and where each policy actually lives.</p>
+        </div>
+        <div class="card">
+        <h3>Campuses &amp; Facilities</h3>
+        <p>Strand, Guy's, St Thomas', Waterloo and Denmark Hill — what's where.</p>
+        </div>
+        <div class="card">
+        <h3>Timetables &amp; Enrolment</h3>
+        <p>Pointers to the right self-service page, rather than a search across many sites.</p>
+        </div>
+    </div>
+    </main>
+
+    <footer class="site">Mockup page for demonstration purposes only · not an official King's College London website</footer>
+
+    <button id="launcher" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    Ask King's
+    </button>
+
+    <div id="panel" role="dialog" aria-label="King's Information Assistant (simulation)">
+    <div class="panel-header">
+        <div class="title">
+        <strong>King's Information Assistant</strong>
+        <small>SIMULATION · scripted demo, not live</small>
+        </div>
+        <button id="closeBtn" aria-label="Close">✕</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="suggestions"></div>
+
+    <form id="input-row">
+        <input id="textInput" type="text" placeholder="Ask a question…" autocomplete="off">
+        <button type="submit">Send</button>
+    </form>
+    </div>
+
+    <script src="script.js"></script>
+    </body>
+</html>
