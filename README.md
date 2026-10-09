@@ -8,13 +8,13 @@ This started as a general-purpose document Q&A bot and is being extended to inde
 
 An earlier version of this project used a TF-IDF classifier with a small, hand-written set of trained categories, falling back to an ungrounded LLM call for anything else. That approach works for narrow, repetitive queries but doesn't scale to open-ended questions about a specific body of knowledge - a classifier has no way to "know" facts, and an ungrounded LLM call has no way to guarantee its answer reflects a particular source rather than general training knowledge. RAG solves this by retrieving the most relevant chunks of a source at query time and instructing the model to answer only from that retrieved context.
 
-## Guardrails
-
-Because the eventual goal is answering real students' questions about university policy, the pipeline is built to fail safely rather than to always produce an answer:
-
 ![Widget simulation preview](widget-simulation/preview.png)
 
 A front-end simulation of the proposed embeddable widget is in [`widget-simulation/`](widget-simulation/) — open `index.html` in a browser to try it (no backend, scripted responses only).
+
+## Guardrails
+
+Because the eventual goal is answering real students' questions about university policy, the pipeline is built to fail safely rather than to always produce an answer:
 
 - **Grounded only.** The model is instructed to answer solely from retrieved source text and to say so explicitly when it can't. Every citation the model produces (`[S1]`, `[S2]`, ...) is checked against the sources it was actually given; unrecognised citations are stripped, and an answer with no valid citation is discarded and replaced with a refusal message.
 - **Relevance gate.** A cross-encoder reranker (FlashRank) scores each retrieved chunk against the query. If the best match scores below a threshold, the pipeline refuses before ever calling the LLM.
