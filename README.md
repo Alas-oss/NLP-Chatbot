@@ -12,6 +12,10 @@ An earlier version of this project used a TF-IDF classifier with a small, hand-w
 
 Because the eventual goal is answering real students' questions about university policy, the pipeline is built to fail safely rather than to always produce an answer:
 
+![Widget simulation preview](widget-simulation/preview.png)
+
+A front-end simulation of the proposed embeddable widget is in [`widget-simulation/`](widget-simulation/) — open `index.html` in a browser to try it (no backend, scripted responses only).
+
 - **Grounded only.** The model is instructed to answer solely from retrieved source text and to say so explicitly when it can't. Every citation the model produces (`[S1]`, `[S2]`, ...) is checked against the sources it was actually given; unrecognised citations are stripped, and an answer with no valid citation is discarded and replaced with a refusal message.
 - **Relevance gate.** A cross-encoder reranker (FlashRank) scores each retrieved chunk against the query. If the best match scores below a threshold, the pipeline refuses before ever calling the LLM.
 - **Prompt injection resistance.** User input is checked against common injection patterns before retrieval runs. Retrieved chunks are checked the same way before being inserted into the prompt, so instructions hidden in a source document can't override the system's behaviour. A random per-session canary string detects and blocks any answer that leaks part of the system prompt.
